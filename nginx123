@@ -1,0 +1,419 @@
+tar zxf nginx-1.8.1.tar.gz
+vim nginx-1.8.1/auto/cc/gcc     ##179行注释debug
+vim /nginx-1.8.1/src/core/nginx.h  
+#define NGINX_VER          "nginx/"   ##curl可以查看到你使用的服务。可以修改 
+
+[root@server2 nginx-1.8.1]# ./configure --prefix=/usr/local/lnmp/nginx --with-http_ssl_module --with-htto_stub-status-module
+./configure: error: invalid option "--with-htto_stub-status-module"
+[root@server2 nginx-1.8.1]# ./configure --prefix=/usr/local/lnmp/nginx --with-http_ssl_module --with-http_stub-status-module
+./configure: error: invalid option "--with-http_stub-status-module"
+[root@server2 nginx-1.8.1]# ./configure --prefix=/usr/local/lnmp/nginx --with-http_ssl_module --with-http_stub_status_module
+checking for OS
+ + Linux 2.6.32-431.el6.x86_64 x86_64
+checking for C compiler ... not found
+
+./configure: error: C compiler cc is not found    ##  需要下载gcc
+
+[root@server2 nginx-1.8.1]# yum install gcc -y
+[root@server2 nginx-1.8.1]# ./configure --prefix=/usr/local/lnmp/nginx --with-http_ssl_module --with-http_stub_status_module
+./configure: error: the HTTP rewrite module requires the PCRE library.
+You can either disable the module by using --without-http_rewrite_module
+option, or install the PCRE library into the system, or build the PCRE library
+statically from the source with nginx by using --with-pcre=<path> option.   ##有依赖关系需要下载他其软件
+[root@server2 nginx-1.8.1]# yum  install -y pcre-devel
+[root@server2 nginx-1.8.1]# ./configure --prefix=/usr/local/lnmp/nginx --with-http_ssl_module --with-http_stub_status_module
+Configuration summary
+  + using system PCRE library
+  + using system OpenSSL library
+  + md5: using OpenSSL library
+  + sha1: using OpenSSL library
+  + using system zlib library
+
+  nginx path prefix: "/usr/local/lnmp/nginx"
+  nginx binary file: "/usr/local/lnmp/nginx/sbin/nginx"
+  nginx configuration prefix: "/usr/local/lnmp/nginx/conf"
+  nginx configuration file: "/usr/local/lnmp/nginx/conf/nginx.conf"
+  nginx pid file: "/usr/local/lnmp/nginx/logs/nginx.pid"
+  nginx error log file: "/usr/local/lnmp/nginx/logs/error.log"
+  nginx http access log file: "/usr/local/lnmp/nginx/logs/access.log"
+  nginx http client request body temporary files: "client_body_temp"
+  nginx http proxy temporary files: "proxy_temp"
+  nginx http fastcgi temporary files: "fastcgi_temp"
+  nginx http uwsgi temporary files: "uwsgi_temp"
+  nginx http scgi temporary files: "scgi_temp"     ##编译成功
+
+[root@server2 nginx-1.8.1]#  make   ##必须在文件第一层执行。
+[root@server2 nginx-1.8.1]# ll Makefile   ##执行之后会产生这个文件
+-rw-r--r-- 1 root root 386 Mar 26 06:23 Makefile
+[root@server2 nginx-1.8.1]# ll -d /usr/local/lnmp/nginx
+ls: cannot access /usr/local/lnmp/nginx: No such file or directory
+[root@server2 nginx-1.8.1]# make install
+[root@server2 nginx-1.8.1]# ll -d /usr/local/lnmp/nginx  ##执行之后会产生这个目录
+drwxr-xr-x 6 root root 4096 Mar 26 06:27 /usr/local/lnmp/nginx
+
+
+/usr/local/lnmp/nginx/html  默认发布目录
+/usr/local/lnmp/nginx/conf/nginx.conf  主配置文件
+cd /usr/local/lnmp/nginx/sbin/
+./nginx -t	##测试语法
+./nginx	       ##运行nginx
+vim .bash_profile     ##改变root环境变量，可以直接与运行./nginx
+#######################
+# .bash_profile
+
+# Get the aliases and functions
+if [ -f ~/.bashrc ]; then
+        . ~/.bashrc
+fi
+
+# User specific environment and startup programs
+
+PATH=$PATH:$HOME/bin:/usr/local/lnmp/nginx/sbin
+
+export PATH
+####################
+ source .bash_profile 
+
+
+netstat -antlp  ##查看开启端口情况    80端口是否开启
+
+[root@server2 sbin]# curl -I localhost
+HTTP/1.1 200 OK
+Server: nginx/
+Date: Fri, 25 Mar 2016 22:54:14 GMT
+Content-Type: text/html
+Content-Length: 612
+Last-Modified: Fri, 25 Mar 2016 22:27:01 GMT
+Connection: keep-alive
+ETag: "56f5bb35-264"
+Accept-Ranges: bytes
+
+  
+./nginx -s stop	  #关闭nginx
+rm -fr /usr/local/lnmp/nginx   ##彻底阐述
+make clean 	#清除Makefile文件
+
+
+vim /usr/local/lnmp/nginx/conf/nginx.conf
+####################
+user  nginx nginx;   ==>自己创建用户 useradd -M -d /usr/local/lnmp/nginx/ -s /sbin/nologin nginx      （-M 表示不建立家目录）
+
+worker_processes  1;   ==> 使用lscup查看CPU(s)个数，用个数安排
+
+#error_log  logs/error.log;
+#error_log  logs/error.log  notice;
+#error_log  logs/error.log  info;
+
+#pid        logs/nginx.pid;
+worker_rlimit_nofile 65535;
+
+events {
+        use epoll;
+    worker_connections  65535;    ##修改软件本身的文件限制
+}
+
+########################## 
+./nginx -s reload	刷新
+
+	
+vim /etc/security/limits.conf   ##系统级的限制配置文件   不用刷新 修改自启
+###############
+用户	限制类型	限制内容	数目
+nginx   hard    nproc   65535
+nginx   hard    nofile  65535
+################
+
+cat /proc/sys/fs/file-max  ##内核级的限制配置文件
+ulimit -a   查看限制信息
+
+ab  -n  1000 -c 100   ##压力测试
+- n一共  
+-c 并发
+nginx  高并发低量极
+HTTp    稳定
+
+vim /usr/local/lnmp/nginx/conf/nginx.conf
+#####################
+    # HTTPS server
+    #
+    server {
+        listen       443 ssl;
+        server_name  localhost;
+
+        ssl_certificate      cert.pem;
+        ssl_certificate_key  cert.pem;     ##公钥私钥改为一个文件
+
+        ssl_session_cache    shared:SSL:1m;
+        ssl_session_timeout  5m;
+
+        ssl_ciphers  HIGH:!aNULL:!MD5;
+        ssl_prefer_server_ciphers  on;
+
+        location / {
+            root   html;
+            index  index.html index.htm;
+        }
+    }
+
+}
+###################
+cd /etc/pki/tls/certs    ##此目录下有Makefile用来生成证书
+[root@server2 certs]# make cert.pem    ##生成证书
+umask 77 ; \
+	PEM1=`/bin/mktemp /tmp/openssl.XXXXXX` ; \
+	PEM2=`/bin/mktemp /tmp/openssl.XXXXXX` ; \
+	/usr/bin/openssl req -utf8 -newkey rsa:2048 -keyout $PEM1 -nodes -x509 -days 365 -out $PEM2 -set_serial 0 ; \
+	cat $PEM1 >  cert.pem ; \
+	echo ""    >> cert.pem ; \
+	cat $PEM2 >> cert.pem ; \
+	rm -f $PEM1 $PEM2
+Generating a 2048 bit RSA private key
+...........................+++
+.................................+++
+writing new private key to '/tmp/openssl.GYXD4p'
+-----
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) [XX]:CN
+State or Province Name (full name) []:Shaanxi     
+Locality Name (eg, city) [Default City]:xi'an
+Organization Name (eg, company) [Default Company Ltd]:westos
+Organizational Unit Name (eg, section) []:linux
+Common Name (eg, your name or your server's hostname) []:server.example.com
+Email Address []:870164556@qq.com
+[root@server2 certs]# ls
+ca-bundle.crt        cert.pem         Makefile
+ca-bundle.trust.crt  make-dummy-cert  renew-dummy-cert
+[root@server2 certs]# mv cert.pem /usr/local/lnmp/nginx/conf/    ##因为配置文件写的相对路径
+nginx -s reload    ##修改PATH值之后可以直接运行nginx命令。
+
+
+
+vim /usr/local/lnmp/nginx/conf/nginx.conf
+##########################
+ location /status {                          (58行)
+                stub_status on;		##统计页面访问量    浏览器输入ip/status即可查看
+                access_log off;
+        }
+
+  server {					(123行)
+    listen       80;
+    server_name  www.hello.com  alias  hello.com;  ##  alias后面为别名
+
+    location / {
+        root   /web/www.hello.com;		##发布目录  虚拟主机
+        index  index.html index.htm;
+    }
+}
+    server {
+    listen       80;
+    server_name  www.linux.com  ;
+
+    location / {
+        root   /web/www.linux.com;
+        index  index.html index.htm;
+    }
+}
+
+
+############负载均衡#########
+server1   172.25.5.1
+server2	  172.25.5.2
+server3	  172.25.5.3
+
+
+
+server1
+vim/usr/local/lnmp/nginx/conf/nginx.conf
+####################
+http {     (18行)
+        upstream westos {
+        server 172.25.5.2:80;
+        server 172.25.5.3:80;
+        }
+
+    include       mime.types;
+    default_type  application/octet-stream;
+
+
+    server {    (129行)
+    listen       80;
+    server_name  www.hello.com  alias  hello.com;
+
+    location / {
+       # root   /web/www.hello.com;
+       #index  index.html index.htm;
+        proxy_pass http://westos;   ##server2和server3开启httpd，进入hello.com则在server2和server3上负载。
+ }
+###################
+
+apache三种工作模式
+perfork  默认 ，多进程
+trent  
+worker
+
+同步 ： 等待时候不通知
+异步 ： 等待时候通知
+阻塞  :  只做一件事
+非阻塞  ： 做一件事等待时去作另一件时
+
+Apache  同步阻塞
+nginx 异步非阻塞
+
+#################nginx算法######################
+ip-hash   一个IP固定访问一个服务器
+sticky	  一个IP在有cook时候固定访问一个服务器(第三方模块)
+wrl-hash
+
+vim /usr/local/lnmp/nginx/conf/nginx.conf
+##########################
+http {     (18行)
+        upstream westos {
+	ip_hash;
+        server 172.25.5.2:80;
+        server 172.25.5.3:80;
+        } 
+
+
+http {     (18行)
+        upstream westos {
+        server 172.25.5.2:80  weight=3; ##权重为3，默认为1.即server1访问3次，server2访问两次
+        server 172.25.5.3:80;
+        }
+
+http {     (18行)
+        upstream westos {
+        server 172.25.5.2:80  down;  ## 维护此服务器，不让其工作。
+        server 172.25.5.3:80  backup;   ##作为备份服务器。
+        }
+############################
+
+nginx -s stop
+cd nginx-1.8.1
+make clean  ##二次编译需要clean
+./configure --prefix=/usr/local/lnmp/nginx  --add-module=/root/nginx-sticky-module-1.0  --with-http_stub_status_module --with-http_ssl_module  ##重新编译，需要把之前的参数都加上
+make
+make install
+
+vim /usr/local/lnmp/nginx/conf/nginx.conf
+##########################
+http {     (18行)
+        upstream westos {
+	sticky;     ## 因为这个是第三方的所以需要重新编译
+        server 172.25.5.2:80;
+        server 172.25.5.3:80;
+        } 
+#######################
+
+
+
+###############MYSQL############3
+
+
+解压MYSQL包
+yum install cmake ##安装cmake   （把cmake安装包放入yum源，或者在cmake包所在路径输入包的全名）
+
+
+编译
+cmake -DCMAKE_INSTALL_PREFIX=/usr/local/mysql -DMYSQL_DATADIR=/usr/local/mysql/data -DMYSQL_UNIX_ADDR=/usr/local/mysql/data/mysql.sock -DWITH_MYISAM_STORAGE_ENGINE=1 -DWITH_INNOBASE_STORAGE_ENGINE=1 -DDEFAULT_CHARSET=utf8 -DDEFAULT_COLLATION=utf8_general_ci -DEXTRA_CHARSETS=all -DMYSQL_TCP_PORT=3306 -DDOWNLOAD_BOOST=1
+
+
+CMake Error at cmake/boost.cmake:81 (MESSAGE):
+  You can download it with -DDOWNLOAD_BOOST=1 -DWITH_BOOST=<directory>
+
+  This CMake script will look for boost in <directory>.  If it is not there,
+  it will download and unpack it (in that directory) for you.
+
+  If you are inside a firewall, you may need to use an http proxy:
+
+  export http_proxy=http://example.com:80
+
+Call Stack (most recent call first):
+  cmake/boost.cmake:238 (COULD_NOT_FIND_BOOST)
+  CMakeLists.txt:443 (INCLUDE)
+
+
+-- Configuring incomplete, errors occurred!
+See also "/rhel7mplayer/mysql-5.7.11/CMakeFiles/CMakeOutput.log".
+See also "/rhel7mplayer/mysql-5.7.11/CMakeFiles/CMakeError.log".
+
+##需要下载gcc-c++
+
+
+
+
+CMake Error at cmake/boost.cmake:81 (MESSAGE):
+  You can download it with -DDOWNLOAD_BOOST=1 -DWITH_BOOST=<directory>
+
+  This CMake script will look for boost in <directory>.  If it is not there,
+  it will download and unpack it (in that directory) for you.
+
+  If you are inside a firewall, you may need to use an http proxy:
+
+  export http_proxy=http://example.com:80
+
+Call Stack (most recent call first):
+  cmake/boost.cmake:238 (COULD_NOT_FIND_BOOST)
+  CMakeLists.txt:443 (INCLUDE)
+
+##需要添加参数-DDOWNLOAD_BOOST=1 -DWITH_BOOST=boost/boost_1_59_0/
+
+CMake Error at cmake/readline.cmake:64 (MESSAGE):
+  Curses library not found.  Please install appropriate package,
+
+      remove CMakeCache.txt and rerun cmake.On Debian/Ubuntu, package name is libncurses5-dev, on Redhat and derivates it is ncurses-devel.
+Call Stack (most recent call first):
+  cmake/readline.cmake:107 (FIND_CURSES)
+  cmake/readline.cmake:181 (MYSQL_USE_BUNDLED_EDITLINE)
+  CMakeLists.txt:471 (MYSQL_CHECK_EDITLINE)
+
+
+-- Configuring incomplete, errors occurred!
+See also "/rhel7mplayer/mysql-5.7.11/CMakeFiles/CMakeOutput.log".
+See also "/rhel7mplayer/mysql-5.7.11/CMakeFiles/CMakeError.log".
+
+##需要下载ncurses-devel
+
+CMake Error at cmake/readline.cmake:64 (MESSAGE):
+  Curses library not found.  Please install appropriate package,
+
+      remove CMakeCache.txt and rerun cmake.On Debian/Ubuntu, package name is libncurses5-dev, on Redhat and derivates it is ncurses-devel.
+Call Stack (most recent call first):
+  cmake/readline.cmake:107 (FIND_CURSES)
+  cmake/readline.cmake:181 (MYSQL_USE_BUNDLED_EDITLINE)
+  CMakeLists.txt:471 (MYSQL_CHECK_EDITLINE)
+
+
+-- Configuring incomplete, errors occurred!
+See also "/rhel7mplayer/mysql-5.7.11/CMakeFiles/CMakeOutput.log".
+See also "/rhel7mplayer/mysql-5.7.11/CMakeFiles/CMakeError.log".
+## 删除CMakeCache.txt
+
+
+CMake Warning at cmake/bison.cmake:20 (MESSAGE):
+  Bison executable not found in PATH
+Call Stack (most recent call first):
+  libmysqld/CMakeLists.txt:142 (INCLUDE)
+
+
+-- Library mysqlserver depends on OSLIBS -lpthread;m;rt;crypt;dl
+-- INSTALL mysqlclient.pc lib/pkgconfig
+-- CMAKE_BUILD_TYPE: RelWithDebInfo
+-- COMPILE_DEFINITIONS: _GNU_SOURCE;_FILE_OFFSET_BITS=64;HAVE_CONFIG_H
+-- CMAKE_C_FLAGS:  -Wall -Wextra -Wformat-security -Wvla -Wwrite-strings -Wdeclaration-after-statement
+-- CMAKE_CXX_FLAGS:  -Wall -Wextra -Wformat-security -Wvla -Woverloaded-virtual -Wno-unused-parameter
+-- CMAKE_C_FLAGS_RELWITHDEBINFO: -O3 -g -fabi-version=2 -fno-omit-frame-pointer -fno-strict-aliasing -DDBUG_OFF
+-- CMAKE_CXX_FLAGS_RELWITHDEBINFO: -O3 -g -fabi-version=2 -fno-omit-frame-pointer -fno-strict-aliasing -DDBUG_OFF
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /rhel7mplayer/mysql-5.7.11
+ ## 安装bison
+
+
+make  -j4  (需要四个cpu)
+
