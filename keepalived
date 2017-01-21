@@ -1,0 +1,39 @@
+ipvsadm 模块
+yum install kernel-devel
+lsmod |grep ip_vs  检查内核模块是否被加载
+如果没有，加载内核为
+modprobe ip_vs
+查看内核版本   #uname -r  
+先把目录/usr/src/kernels/2.6.32-71.el6.x86_64链接为/usr/src/linux，命令如下
+ln –s /usr/src/2.6.32-71.el6.x86_64    /usr/src/linux 
+解压ipvsadm-1.24.tar.gz,执行"make;但是报错了
+make[1]: *** [libipvs.o] Error 1
+make[1]: Leaving directory `/usr/src/ipvsadm-1.26/libipvs'
+make: *** [libs] Error 2
+yum install libnl* popt*
+再次make，还是有报错
+make: *** [ipvsadm] Error 1
+yum install    popt-static（下载rpm包）
+安装keepalived
+报错解决
+libnfnetlink-1.0.1.tar.bz2
+######### 将keepalived做成启动服务，方便管理##########
+cp /usr/local/etc/rc.d/init.d/keepalived /etc/init.d/
+cp /usr/local/etc/sysconfig/keepalived /etc/sysconfig/
+mkdir /etc/keepalived/
+cp /usr/local/etc/keepalived/keepalived.conf /etc/keepalived/
+cp /usr/local/sbin/keepalived /usr/sbin/
+/etc/init.d/keepalived start
+ /sbin/ipvsadm -A -t $VIP:80 -s rr
+ /sbin/ipvsadm -a -t $VIP:80 -r $RIP1:80 -g
+ /sbin/ipvsadm -a -t $VIP:80 -r $RIP2:80 -g
+
+
+
+
+
+
+
+
+
+
