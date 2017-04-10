@@ -1,0 +1,12 @@
+iptables -t nat -A POSTROUTING -o wlp6s0 -s 172.25.254.0/24 -j SNAT --to 192.168.1.121(wlp6s0的网址)
+cat /proc/sys/net/ipv4/ip_forward
+里面为1
+物理机加DNS=114.114.114.114
+虚拟机
+加网关route add gw 172.25.254.113(物理机的ip)
+vim /etc/sysconfig/network-scripts
+添加 DNS1=114.114.114.114
+vim /etc/resolv.conf
+nameserver 114.114.114.114
+nameserver 8.8.8.8
+qemu-img create -f qcow2 -b rhel6.5.qcow2 vm9
