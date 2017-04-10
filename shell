@@ -1,0 +1,44 @@
+#!/bin/bash
+name=user
+for i in $(seq 1 20)
+do
+        useradd $name$i
+        passwd = $(cat /dev/urandom | head -1 | md5sum | head -c 5)
+        echo user$passwd | passwd --stdin $name$i
+        echo "$name$i user$passwd" >> userdata
+done
+for i in $(seq 1 20)
+do
+        userdel rf user$i
+done
+
+
+
+#!/bin/bash
+name=user
+for i in $(seq 1 20)
+do
+        useradd $name$i
+        passwd = $(cat /dev/urandom | head -1 | md5sum | head -c 5)
+        echo user$passwd | passwd --stdin $name$i
+        echo "$name$i user$passwd" >> userdata
+done
+for i in $(seq 1 20)
+do
+        userdel rf user$i
+done
+
+
+#!/bin/bash
+iptables -F
+iptables -A input -p tcp -sport 80,22 -j accept
+iptables -A input -p tcp -s 98.76.54.32 -j drop
+iptables -A input -p -s 123.45.67.89 -j accept
+
+#!/bin/bash
+for i in $(seq -w 1 10)  [-w 可以产生位数相同的数字]
+do
+#       echo $i
+        useradd test$i
+        echo test$i@campus | passwd --stdin test$i
+done
