@@ -1,0 +1,228 @@
+datetimectl set-time "2016-11-01 12:06:26"
+
+date +%F  或者 date +%Y+%m+%d
+
+date -d"80 day ago" +"%F %H:%M:%S" > /mnt/datafile
+
+date -d"-80 day ago" +"%F %H:%M:%S" >> /mnt/datafile
+
+cat /mnt/date.txt | wc -c   字符  cat /mnt/date.txt | wc -m  行数 cat /mnt/date.txt | wc -l 单词数  cat /mnt/date.txt | wc -w
+
+!date
+
+touch westos{a..c}_file{8..13}
+
+mv westos{a..c}_file{8..13} /tmp
+
+vim /etc/vimrc
+
+set nu  set mouse=a (设定鼠标可以操作光标位置)
+
+groupadd -g 888 phone
+
+useradd huawei
+
+useradd -u 1800 mi -s /bin/sh
+
+useradd -u 1801 -c User iphone
+
+usermod -d /home/huawei huawei
+
+usermod -u 1700 -s /sbin/nologin
+
+usermod -c 苹果手机 iphone
+
+usermod -d /home/huawei huawei
+
+vim /etc/login.refs
+
+PASS_MAX_DAYS=0
+
+PASS_MIN_DAYS=7
+
+visudo
+
+99行 admin hostname=(root) NOPASSWD: /usr/sbin/useradd
+
+mkdir /pubdir
+
+chmod 1775 /pubdir
+
+ps ax -o %cpu --sort -%cpu | grep -v CPU | head -n 5 > /mnt/pidfile
+
+lastb | awk -F " " '{print $3}' | grep [1-9]
+
+sed -e '79s/yes/no/g'  /etc/ssh/sshd_config
+
+tar zcf mnt.tar.gz /mnt/ -R
+
+ssh-keygen
+
+cd /root/.ssh
+
+ssh-copy-id -i id_rsa.pub root@ip
+
+scp id_rsa root@ip
+
+scp mnt.tar.gz root@ip:/mnt
+
+vim /etc/chronyd.conf
+
+server 172.25.113.104 iburst
+
+systemctl stop firewalld
+
+systemctl restart chronyd
+
+ timedatectl set-timezone Africa/Juba
+
+服务端
+
+echo "*.*  @172.5.113.104" /etc/rsyslog.conf
+
+客户端
+
+vim /etc/rsyslog.conf
+
+$ModLoad imudp
+
+$UDPServerRun 514
+
+两边重起服务
+
+systemctl restart rsyslogd
+
+ connection add con-name eth0 ifname eth0  type ethernet ip4 172.25.254.113 gw4 172.25.254.254
+
+yum install dhcpd -y
+
+ cp /usr/share/doc/dhcp-4.2.5/dhcpd.conf.example /etc/dhcp/dhcpd.conf
+
+vim /etc/dhcp/dhcpd.conf
+
+subnet 172.25.113.0 netmask 255.255.255.0 {
+
+  range 172.25.113.150 172.25.113.200;
+
+  option routers 172.25.113.103;
+
+}
+
+mount /iso/rhel-server-7.1-x86_64-dvd.iso on /var/www/html/iso
+
+mount -a
+
+vim /etc/fstab
+
+/iso/rhel-server-7.1-x86_64-dvd.iso    /var/www/html/iso    iso9660          ro,relatime  0 0
+
+vim /etc/yum.repo/hcx.repo
+
+[hcx]
+
+name=hcx
+
+baseurl=http://172.25.113.250:/iso
+
+enabled=1
+
+gpgcheck=0
+
+yum clean all
+
+yum repolist
+
+yum install lftp
+
+yum install vsftpd
+
+yum remove vsftpd
+Virsh脚本
+
+#!/bin/bash
+
+case "$1" in
+
+        start|Start)
+
+        virsh start $2
+
+        ;;
+
+        shutdown|poweroff)
+
+        virsh destroy $2
+
+        ;;
+
+        undefine)
+
+        virsh undefine $2
+
+        ;;
+
+        create)
+
+        qemu-img create -f qcow2 -b /var/lib/libvirt/images/$2.img /var/lib/libvirt/images/$3.img
+
+        virt-install \
+
+        --name $3 \
+
+        --ram 500 \
+
+        --disk /var/lib/libvirt/images/$2.img \
+
+        --import
+
+        ;;
+
+        *)
+
+        echo "please use start:Start:shutdown:poweroff:undefine:create"
+
+        ;;
+
+esac
+改变ip脚本
+
+#!/bin/bash
+echo "please input a disk(eth0)"
+read disk
+echo "please insput a number[0-255]:"
+read number
+if [ -z $number ]
+then
+        echo "please input a number[0-255]"
+
+fi
+ip addr show
+source=172.25.113
+HCX1=/etc/sysconfig/network-scripts/
+cd $HCX1
+echo "now positionis:"
+pwd
+if [ -e ifcfg-$disk ]
+then
+        sed  '/^IPADDR/d' ifcfg-$disk > ifcfg
+        echo "IPADDR=$source.$number" >> ifcfg
+        echo "GATEWAY=172.25.254.250" >> ifcfg
+        echo "DNS1=172.25.254.250" >> ifcfg
+        rm -fr ifcfg-$disk
+        mv ifcfg ifcfg-$disk
+else
+        exit
+fi
+HCX2=yes
+echo "please reboot(yes|no):"
+read answer
+if [ $answer=$HCX2 ]
+then
+        /etc/init.d/network restart
+        sleep 2
+
+else
+        echo "This is need reboot"
+fi
+
+
