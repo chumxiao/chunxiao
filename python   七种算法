@@ -1,0 +1,157 @@
+插入排序
+  #!/usr/bin/env python
+   def insert_sort(lists):
+           count = len(lists)
+           for i in range(1,count):
+                   key = lists[i]
+                   j = i - 1
+                   while j >= 0:
+                           if lists[j] > key:
+                                   lists[i] = lists[j]
+                                  lists[j] = key
+                          j -= 1
+  if __name__ == '__main__':
+          lists = [5,6,7,3,2,9,67]
+          print(str(lists))
+  insert_sort(lists)
+  希尔排序
+  #!/usr/bin/env python
+   def insert_sort(lists):
+           count = len(lists)
+           for i in range(1,count):
+                   key = lists[i]
+                   j = i - 1
+                   while j >= 0:
+                           if lists[j] > key:
+                                   lists[i] = lists[j]
+                                  lists[j] = key
+                          j -= 1
+  if __name__ == '__main__':
+          lists = [5,6,7,3,2,9,67]
+          print(str(lists))
+  insert_sort(lists)
+冒泡排序
+#!/usr/bin/env python
+  2 if __name__ == '__main__':
+  3         l = [4,1,9,13,34,26,10,7,4]
+  4         def bubble_sort(l):
+  5                 for i in range(8):
+  6                         for j in range(len(l)-1):
+  7                                 if l[j] > l[j+1]:
+  8                                         tmp = l[j]
+  9                                         l[j] = l[j+1]
+ 10                                         l[j+1] = tmp
+ 11                         print(str(l))
+ 12                 print("result: " + str(l))
+ 13         bubble_sort(l)
+ 快速排序
+ #!/usr/bin/env python
+  2 if __name__ == '__main__':
+  3         lists = [85,4,7,8,34,21,90,43,76]
+  4         def quick_sort(lists,left,right):
+  5                 if left >= right:
+  6                         return lists
+  7                 key = lists[left]
+  8                 low = left
+  9                 high = right
+ 10                 while left < right:
+ 11                         while left < right and lists[right] >= key:
+ 12                                 right -= 1
+ 13                         lists[left] = lists[right]
+ 14                 while left < right and lists[left] <= key:
+ 15                         left += 1
+ 16                 lists[right] = lists[left]
+ 17                 quick_sort(lists,low,left-1)
+ 18                 quick_sort(lists,left + 1,high)
+ 19                 print(str(lists))
+ 20         print(str(lists))
+ 21 quick_sort(lists,85,76)
+ 选择排序
+ #!/usr/bin/env python
+  2 if __name__ == '__main__':
+  3         lists = [3,6,5,78,54,12,34,51]
+  4         def select_sort(lists):
+  5                 count = len(lists)
+  6                 for i in range(0,count):
+  7                         min = i
+  8                         for j in range(i+1,count):
+  9                                 if lists[min] > lists[j]:
+ 10                                         min = j
+ 11                         lists[min],lists[i] = lists[i],lists[min]
+ 12                         print(str(lists))
+ 13                 print("result: " + str(lists))
+ 14         select_sort(lists)
+归并排序
+2 def merge(left,right):
+  3         i,j = 0,0
+  4         result = []
+  5         while i < len(left) and j < len(right):
+  6                 if left[i] <= right[j]:
+  7                         result.append(left[i])
+  8                         i += 1
+  9                 else:
+ 10                         result.append(right[j])
+ 11                         j += 1
+ 12         result += left[i:]
+ 13         result += right[j:]
+ 14         return result
+ 15 def merge_sort(lists):
+ 16         if len(lists) <= 1:
+ 17                 return lists
+ 18         num = len(lists) / 2
+ 19         left = merge_sort(lists[:num])
+ 20         right = merge_sort(lists[num:])
+ 21         return merge(left,right)
+ 22 lists = [5,6,4,3,78,23,31]
+ 23 a=merge_sort(lists)
+ 24 print(a)
+堆排序
+1 #!/usr/bin/env python
+  2 import heapq
+  3 def Heapify(a,start,end):
+  4         left = 0
+  5         right = 0
+  6         maxv = 0
+  7         left = start * 2
+  8         right = start * 2 + 1
+  9         while left <= end:
+ 10                 maxv = left
+ 11                 if right <= end:
+ 12                         if a[left] < a[right]:
+ 13                                 maxv = right
+ 14                         else:
+ 15                                 maxv = left
+ 16                 if a[start] < a[maxv]:
+ 17                         a[maxv],a[start] = a[start],a[maxv]
+ 18                         start = maxv
+ 19                 else:
+ 20                         break
+ 21                 left = start * 2
+ 22                 right = start * 2 + 1
+ 23 def BuildHeap(a):
+ 24         size = len(a)
+ 25         i = (size - 1) // 2
+ 26         while i >= 0:
+ 27                 Heapify(a,i,size - 1)
+ 28                 i = i -1
+ def HeapSort(a):
+ 30         BuildHeap(a)
+ 31         print 'first before sorted:',a
+ 32         i = len(a) - 1
+ 33         while i >= 0:
+ 34                 a[0],a[i] = a[i],a[0]
+ 35                 Heapify(a,0,i - 1)
+ 36                 i = i - 1
+ 37 a = [4,2,3,6,8,9,0,87,43]
+ 38 HeapSort(a)
+ 39 print 'first after sorted',a
+
+ 
+ 
+
+
+ 
+
+
+  
+  
