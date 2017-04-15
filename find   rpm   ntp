@@ -1,0 +1,99 @@
+软件的安装
+rpm     -i 安装
+        -v 显示安装机进度
+        -h 指定加密方式
+        -e 卸载
+        -ql 查询软件生成文件
+        -qlp 查询软件安装后会生成什么
+        -qa   查询系统安装的所有软件
+        -qp  查询软件安转后的名字
+        -qf 查询filename属于那个安装包
+        -vhi  --force 强制安装
+        -qi  查询软件信息
+        -Kv 检查软件是否被改动
+        -qp name.rpm --script 检查软件安装或卸载执行的动作
+mount
+vim /etc/rc.d/rc.local
+chmod +x /etc/rc.d/rc.local
+挂载(ftp  http file)
+mount /mnt/*.iso /var/www/html/iso
+mount -a
+vim /etc/yum.repo.d/hcx.repo
+[name]
+name=hcx
+baseurl=http://172.25.113.250/iso
+gpgcheck=0
+mount /mnt/*.iso /var/ftp/pub/iso
+baseurl=ftp://172.25.113.250/iso
+或者本地使用
+baseurl=file:///mnt/
+yum命令
+yum install   安装
+
+yum repolist  列出设定yum源
+yum remove     卸载
+yum list software  查看软件中是否由此软件
+yum list all 查看所头软件
+yum list installed 查看已经安装的软件
+yum list available 查看可以用yum安装的软件
+yum clean all
+yum search software
+
+yum whatprovides */scp
+yum update
+yum history
+yum reinstall
+yum info   查看软件的信息
+yum groups list  查看软件族的信息
+yum groups info 查看软件组包含的软件
+yum groups install   下载
+yum groups remove
+yum repolist
+第三方软件安装
+yum install createrepo
+createrepo -v /mnt/software
+会生成一个repodate的文件
+[westos]
+name = hcx
+baseurl=file:///var/ftp/pub/rhel7mplayer
+gpgcheck=0
+上网时
+yum groups info Input\ Methods
+中文输入
+yum groups install Input\ Methods
+同步时间
+服务端
+yum install chrony-*
+systemctl start chronyd
+vim /etc/chronyd.conf
+allow 172.25.113.0/24
+local stratum 10
+重启服务关闭火墙
+客户端
+yum install chrony-*
+vim /etc/chronyd.conf
+server 172.25.113.105 iburst
+重启服务关闭火墙
+chronyc sources -v  查看状态
+
+
+[root@localhost ~]# chronyc sources -v
+210 Number of sources = 1
+
+  .-- Source mode  '^' = server, '=' = peer, '#' = local clock.
+ / .- Source state '*' = current synced, '+' = combined , '-' = not combined,
+| /   '?' = unreachable, 'x' = time may be in error, '~' = time too variable.
+||                                                 .- xxxx [ yyyy ] +/- zzzz
+||                                                /   xxxx = adjusted offset,
+||         Log2(Polling interval) -.             |    yyyy = measured offset,
+||                                  \            |    zzzz = estimated error.
+||                                   |           |
+MS Name/IP address         Stratum Poll Reach LastRx Last sample
+===============================================================================
+^* 172.25.113.105               10   6    17    17  -1660ns[  -39us] +/-  299us
+表示成功
+find / -name file 查找文件
+find /mnt -user westos -a -group redhat  组和所有人都符合
+find /mnt -user westos -a -not redhat    组和所有人有一个符合就可以
+dd if=/dev/zero of=/mnt/file1 bs=1024 mount=10
+find /mnt -size +10k
