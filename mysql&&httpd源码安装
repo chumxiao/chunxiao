@@ -1,0 +1,72 @@
+mysql-5.7.18-linux-glibc2.5-i686.tar.gz的安装与报错解决方法
+tar zxf mysql-5.7.18-linux-glibc2.5-i686.tar.gz -C /usr/local/mysql/
+userdel mysql                                           # 删除用户 
+groupdel mysql                                          # 删除用户组名
+mkdir /usr/local/mysql/data
+chown mysql:mysql /usr/local/mysql/data -R
+ groupadd mysql                                          # 创建一个名为mysql的用户组  
+useradd -g mysql  mysql                   # 在用户组下创建用户
+cd /usr/local/mysql/
+./mysqld --user=mysql --basedir=/home/mysql --datadir=/home/mysql/data --initialize
+./support-files/mysql.server start
+vim /etc/my.cnf
+[mysqld]
+ 
+basedir = /home/mysql
+datadir = /home/mysql/data
+ 
+character_set_server=utf8
+init_connect='SET NAMES utf8'
+ 
+ 
+[client]
+default-character-set=utf8
+
+
+
+如果有报错：
+yum whatprovides libncurses.so.5
+(可以找到包)
+开机自启：
+cp /usr/local/mysql/support-files/mysql.server /etc/init.d/mysqld 
+chmod 755 /etc/init.d/mysqld
+chkconfig --list mysqld 
+chkconfig --add mysqld 
+chkconfig mysqld on 
+ln -s /home/mysql/bin/mysql /usr/bin/mysql(可以用mysql -uroot -p123456)
+./usr/local/mysql/bin/mysql_secure_install
+(重设密码)
+httpd源码安装
+tar包：
+apr-1.5.2.tar.gz  apr-util-1.5.4.tar.gz  httpd-2.4.25.tar.gz
+./configure --prefix=/usr/local/apr
+make && make install
+cd apr-util-1.5.4
+./configure --prefix=/usr/local/apr-util --with-apr=/usr/local/apr/bin/apr-1-config 
+make && make install 
+cd httpd-2.4.25
+./configure --prefix=/usr/local/httpd --enable-so ---with-apr=/usr/local/apr/ -with-apr-util=/usr/local/apr-util/
+make && make install
+ln -s /usr/local/httpd/bin/apachectl /etc/init.d/httpd
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
